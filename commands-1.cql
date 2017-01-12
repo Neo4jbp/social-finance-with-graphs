@@ -4,33 +4,46 @@ CREATE
   (alice:Person { name: 'Alice' }),
   (bob:Person { name: 'Bob' }),
   (carol:Person { name: 'Carol' }),
-  (bob)-[:BORROWED { amount: 10 }]->(carol),
-  (bob)-[:BORROWED { amount: 12 }]->(carol),
-  (carol)-[:BORROWED { amount: 15 }]->(bob),
-  (bob)-[:BORROWED { amount: 4 }]->(alice),
-  (alice)-[:BORROWED { amount: 10 }]->(carol),
-  (alice)-[:BORROWED { amount: 14 }]->(bob),
-  (alice)-[:BORROWED { amount: 5 }]->(carol),
-  (carol)-[:BORROWED { amount: 12 }]->(alice);
+  (dan:Person { name: 'Dan' }),
+  (eve:Person { name: 'Eve' }),
+  (francis:Person { name: 'Francis' }),
+
+  (alice)-[:BORROWED { amount: 5 }]->(bob),
+  (bob)-[:BORROWED { amount: 5 }]->(alice),
+
+  (bob)-[:BORROWED { amount: 5 }]->(carol),
+  (carol)-[:BORROWED { amount: 5 }]->(bob),
+  (bob)-[:BORROWED { amount: 11 }]->(carol),
+  (bob)-[:BORROWED { amount: 7 }]->(eve),
+
+  (dan)-[:BORROWED { amount: 4 }]->(eve),
+  (alice)-[:BORROWED { amount: 34 }]->(dan),
+  (eve)-[:BORROWED { amount: 12 }]->(alice),
+
+  (eve)-[:BORROWED { amount: 12 }]->(francis);
+
 
 CREATE CONSTRAINT ON (p:Person) ASSERT p.name IS UNIQUE;
 
 // Ki kapta a legtöbb pénzt?
-MATCH (p:Person)<-[b:BORROWED]-()
-RETURN p.name AS Name, sum(b.amount) AS Received
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)<-[b:BORROWED]-()
+RETURN person.name AS Name, SUM(b.amount) AS Received
 ORDER BY Received DESC
 LIMIT 1;
 
 // Ki adta a legtöbb pénzt?
-MATCH (p:Person)-[b:BORROWED]->()
-RETURN p.name AS Name, sum(b.amount) AS Sent
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)-[b:BORROWED]->()
+RETURN person.name AS Name, SUM(b.amount) AS Sent
 ORDER BY Sent DESC
 LIMIT 1;
 
 // Kinek mennyi az egyenlege?
-MATCH (p:Person)-[s:BORROWED]->() WITH p, sum(s.amount) AS Sent
-MATCH (p)<-[r:BORROWED]-() WITH p, Sent, sum(r.amount) AS Received
-RETURN p.name AS Name, (Sent - Received) AS Balance, Sent, Received
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person:Person)-[s:BORROWED]->() WITH person, SUM(s.amount) AS Sent
+OPTIONAL MATCH (person)<-[r:BORROWED]-() WITH person, Sent, SUM(r.amount) AS Received
+RETURN person.name AS Name, Received - Sent AS Balance, Sent, Received
 ORDER BY Balance DESC;
 
 // Kinek mennyivel tartoznak?

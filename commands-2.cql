@@ -12,6 +12,7 @@ CREATE
   (carol:Person { name: 'Carol' }),
   (dan:Person { name: 'Dan' }),
   (eve:Person { name: 'Eve' }),
+  (francis:Person { name: 'Francis' }),
 
   (alice)-[:SENT]->(t_a_b:Transaction {amount: 5})-[:RECEIVED]->(bob),
   (bob)-[:SENT]->(t_b_a:Transaction {amount: 5})-[:RECEIVED]->(alice),
@@ -25,48 +26,55 @@ CREATE
 
   (dan)-[:SENT]->(:Transaction {amount: 4})-[:RECEIVED]->(eve),
   (alice)-[:SENT]->(:Transaction {amount: 34})-[:RECEIVED]->(dan),
-  (eve)-[:SENT]->(:Transaction {amount: 12})-[:RECEIVED]->(alice);
+  (eve)-[:SENT]->(:Transaction {amount: 12})-[:RECEIVED]->(alice),
+
+  (eve)-[:SENT]->(:Transaction {amount: 12})-[:RECEIVED]->(francis);
 
 
 
 // Ki kapta a legtöbb pénzt?
-MATCH (person:Person)<-[:RECEIVED]-(t:Transaction)
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)<-[:RECEIVED]-(t:Transaction)
 RETURN person.name, SUM(t.amount) AS received
 ORDER BY received DESC
 LIMIT 1;
 
 // Ki adta a legtöbb pénzt?
-MATCH (person:Person)-[:SENT]->(t:Transaction)
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)-[:SENT]->(t:Transaction)
 RETURN person.name, SUM(t.amount) AS received
 ORDER BY received DESC
 LIMIT 1;
 
 // Kinek mennyi az egyenlege?
-OPTIONAL MATCH (person:Person)<-[:RECEIVED]-(r:Transaction) WITH person, SUM(r.amount) AS Received
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)<-[:RECEIVED]-(r:Transaction) WITH person, SUM(r.amount) AS Received
 OPTIONAL MATCH (person)-[:SENT]->(s:Transaction) WITH Received, person, SUM(s.amount) AS Sent
-RETURN person.name AS Name, (Received - Sent) AS Balance
+RETURN person.name AS Name, Received - Sent AS Balance
 ORDER BY Balance DESC;
 
 // Kinek mennyivel tartoznak?
-MATCH (person:Person)<-[:RECEIVED]->(t:Transaction)
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)-[:SENT]->(t:Transaction)
 WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
 RETURN person.name AS Name, SUM(t.amount) AS `Total amount`
 ORDER BY `Total amount` DESC;
 
 // Kinek mennyi a tartozása?
-MATCH (person:Person)<-[:RECEIVED]->(t:Transaction)
+MATCH (person:Person) WITH person
+OPTIONAL MATCH (person)<-[:RECEIVED]-(t:Transaction)
 WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
 RETURN person.name AS Name, SUM(t.amount) AS `Total amount`
 ORDER BY `Total amount` DESC;
 
 // Ki, kinek mennyivel?
-MATCH (person:Person)<-[:RECEIVED]->(t:Transaction)<-[:SENT]-(to:Person)
+MATCH (person:Person)<-[:RECEIVED]-(t:Transaction)<-[:SENT]-(to:Person)
 WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
-RETURN person.name AS Name, to.name AS TO, SUM(t.amount) AS `Total debt`
-ORDER BY `Total debt` DESC;
+RETURN person.name AS Name, to.name AS TO, SUM(t.amount) AS `Debt`
+ORDER BY `Debt` DESC;
 
 // Mennyi az összes ki nem egyenlített tartozás?
-MATCH (person:Person)<-[:RECEIVED]->(t:Transaction)
+MATCH (person:Person)<-[:RECEIVED]-(t:Transaction)
 WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
 WITH SUM(t.amount) AS personalDebts
 RETURN sum(personalDebts) AS `Global debt`;
