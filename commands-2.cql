@@ -28,22 +28,23 @@ CREATE
   (alice)-[:SENT]->(:Transaction {amount: 34})-[:RECEIVED]->(dan),
   (eve)-[:SENT]->(:Transaction {amount: 12})-[:RECEIVED]->(alice),
 
-  (eve)-[:SENT]->(:Transaction {amount: 12})-[:RECEIVED]->(francis);
+  (eve)-[:SENT]->(:Transaction {amount: 12})-[:RECEIVED]->(francis),
+  (dan)-[:SENT]->(:Transaction {amount: 7})-[:RECEIVED]->(francis);
 
 
 
 // Ki kapta a legtöbb pénzt?
 MATCH (person:Person) WITH person
 OPTIONAL MATCH (person)<-[:RECEIVED]-(t:Transaction)
-RETURN person.name, SUM(t.amount) AS received
-ORDER BY received DESC
+RETURN person.name AS Name, SUM(t.amount) AS Received
+ORDER BY Received DESC
 LIMIT 1;
 
 // Ki adta a legtöbb pénzt?
 MATCH (person:Person) WITH person
 OPTIONAL MATCH (person)-[:SENT]->(t:Transaction)
-RETURN person.name, SUM(t.amount) AS received
-ORDER BY received DESC
+RETURN person.name AS Name, SUM(t.amount) AS Sent
+ORDER BY Sent DESC
 LIMIT 1;
 
 // Kinek mennyi az egyenlege?
@@ -70,11 +71,27 @@ ORDER BY `Total amount` DESC;
 // Ki, kinek mennyivel?
 MATCH (person:Person)<-[:RECEIVED]-(t:Transaction)<-[:SENT]-(to:Person)
 WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
-RETURN person.name AS Name, to.name AS TO, SUM(t.amount) AS `Debt`
+RETURN person.name AS Name, to.name AS To, SUM(t.amount) AS `Debt`
 ORDER BY `Debt` DESC;
 
 // Mennyi az összes ki nem egyenlített tartozás?
 MATCH (person:Person)<-[:RECEIVED]-(t:Transaction)
 WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
 WITH SUM(t.amount) AS personalDebts
-RETURN sum(personalDebts) AS `Global debt`;
+RETURN SUM(personalDebts) AS `Global debt`;
+
+// Adott ember hány másiknak tartozik?
+MATCH (person:Person {name: 'Eve'})<-[:RECEIVED]-(t)<-[:SENT]-(to)
+WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
+RETURN person.name AS Name, count(to) AS To, SUM(t.amount) AS `Debt`;
+
+// Adott ember átlagosan mennyivel tartozik?
+MATCH (person:Person {name: 'Eve'})<-[:RECEIVED]-(t)<-[:SENT]-(to)
+WHERE NOT EXISTS ((t)-[:SETTLEMENT_FOR]-())
+RETURN person.name AS Name, count(to) AS To, AVG(t.amount) AS `Average debt`;
+
+// Azok, akik már adtak egy adott embernek kölcsönt, kiknek adtak még?
+MATCH (person:Person {name: 'Eve'})<-[:RECEIVED]-(originalTransaction)<-[:SENT]-(patron) WITH person, patron, originalTransaction
+WHERE NOT EXISTS ((originalTransaction)-[:SETTLEMENT_FOR]-())
+MATCH (otherPerson)<-[]-(otherTransaction)-[:SENT]-(patron) WHERE otherPerson.name <> person.name
+RETURN otherPerson, patron, otherTransaction, person, originalTransaction;
