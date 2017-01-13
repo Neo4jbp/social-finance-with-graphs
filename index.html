@@ -27,6 +27,9 @@ layout: true
 class: center, middle
 
 ---
+#Budapest Neoj4 Meetup
+
+---
 #1.
 #Neo4j swag
 ---
@@ -41,32 +44,24 @@ Ha van érdekes tématok, jelentkezzetek előadónak!
 #4.
 [GraphConnect Europe](http://graphconnect.com)
 
-London, 2017. május 11.
+.small[London, 2017. 05. 11.]
 
+.small[(Early bird: €149 - 'til 01. 15.)]
 
 
 ---
 #Social finance with graphs
-???
-.green[2 féle] Sorozat
 
-kérdések => konferencia, slack, meetupok => .green[Modellezés]
-
-2. kicsit később
 
 ---
 #Gábor Döbrei
 ##[@gabor_dobrei](https://twitter.com/gabor_dobrei)
 ###[Node.js](https://hu.linkedin.com/in/gábor-döbrei-230a4368) and [graph enthusiast](https://github.com/gabordobrei/) · Husband · co-organizer of [@neo4jbp](https://www.meetup.com/neo4j-budapest-users/)
 
+
 ---
 #Building a graph database application
 ##Develop our graph model in a test-driven fashion
-???
-Hogyan tudunk modern (**folyamatosan fejlodo, inkrementális, iteratív**) szoftverfejlesztési metodológiákat alkalmazni.
-
-Gráfmodellezés TDD stílusban
-
 
 
 ---
@@ -84,26 +79,16 @@ I left my wallet in the office and we are heading to the restaurant...
 #Solution
 Track the $$<br>
 in a transparent way.
-???
-2. Sorozat => Hakni: .green[chat bot]
+
 
 ---
 #The .green[*questions*] drive the modeling process
-???
-Emarsys: XP => USER STORIES
-
-A user story is a tool used in Agile software development to capture a description of a software feature .green[from an end-user perspective]. The user story describes the .green[type of user], .green[what they want] and .green[why].
 
 
 ---
 .green[AS A] person who happily give money to my teammates,
 .green[I WANT] to know, who can I trust with borrowing money,
 .green[SO THAT] I get my money back.
-???
-.green[AS A klóz]: meghatározza a kontextust: csapat tagok (entitás) és közöttük pénzt kölcsönadása
-
-.green[I WANT]: megfogalmazza az első kérdést: kiben bízhatok meg, hogy vissza is kapjam a pénzem...
-
 
 
 ---
@@ -129,23 +114,15 @@ Nodes for Things, Relationships for Structure
 ---
 DEMO
 
+
 ---
-Pitfall #1
+Fine-Grained versus Generic Relationships
 
-.green[:BORROWED]
-???
-Nem tudunk semmit a .green[:BORROWED] relationship-ről...
-
-.green[Gondolhatnánk], hogy akkor tegyünk propertyket az élre, de akkor sem tudunk mit mondani arra, hogy egy ilyen kölcsönt visszafizettek-e már.
+Use well named relationship types to avoid some use of labels
 
 
-
-
-
-<!-- ---
-Fine-Grained versus Generic Relationships -->
-
-
+---
+DEMO #2
 
 
 ---
