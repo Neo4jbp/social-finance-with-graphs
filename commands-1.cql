@@ -20,8 +20,8 @@ CREATE
   (alice)-[:BORROWED { amount: 34 }]->(dan),
   (eve)-[:BORROWED { amount: 12 }]->(alice),
 
-  (eve)-[:BORROWED { amount: 12 }]->(francis);
-
+  (eve)-[:BORROWED { amount: 12 }]->(francis),
+  (dan)-[:BORROWED { amount: 7 }]->(francis);
 
 CREATE CONSTRAINT ON (p:Person) ASSERT p.name IS UNIQUE;
 
